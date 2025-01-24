@@ -33,6 +33,10 @@ class Character:
             self.money += earned_money
             print(f"{self.name} {earned_money} TL kazandı. Toplam para: {self.money} TL")
 
+    def change_job(self, new_job):
+        self.job = new_job
+        print(f"{self.name} artık {self.job} olarak çalışıyor.")
+
 # Karakter oluşturma
 player_name = input("Karakter adını girin: ")
 player_age = int(input("Karakter yaşını girin: "))
@@ -47,6 +51,10 @@ player.display_info()
 
 # Sağlık kontrolü
 player.check_health()
+
+# Meslek değiştirme
+player.change_job("Mühendis")
+player.display_info()
 
 # Çalışma
 player.work()
