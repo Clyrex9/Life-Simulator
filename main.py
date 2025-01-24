@@ -16,6 +16,7 @@ class Character:
     def age_up(self):
         self.age += 1
         print(f"{self.name} bir yaş büyüdü! Şimdi {self.age} yaşında.")
+        self.random_event()  # Yaşlanınca rastgele bir olay tetikle
 
     def check_health(self):
         if self.health > 70:
@@ -37,6 +38,38 @@ class Character:
         self.job = new_job
         print(f"{self.name} artık {self.job} olarak çalışıyor.")
 
+    def random_event(self):
+        events = [
+            self._get_sick,
+            self._have_accident,
+            self._win_lottery,
+            self._find_money,
+            self._nothing_happens
+        ]
+        random.choice(events)()  # Rastgele bir olay seç ve tetikle
+
+    def _get_sick(self):
+        self.health -= 20
+        print(f"{self.name} hastalandı! Sağlık: {self.health}")
+
+    def _have_accident(self):
+        self.health -= 30
+        self.money -= 50
+        print(f"{self.name} kaza geçirdi! Sağlık: {self.health}, Para: {self.money}")
+
+    def _win_lottery(self):
+        lottery_money = random.randint(1000, 5000)
+        self.money += lottery_money
+        print(f"{self.name} piyangodan {lottery_money} TL kazandı! Toplam para: {self.money}")
+
+    def _find_money(self):
+        found_money = random.randint(10, 100)
+        self.money += found_money
+        print(f"{self.name} yerde {found_money} TL buldu! Toplam para: {self.money}")
+
+    def _nothing_happens(self):
+        print(f"{self.name} için bu yıl sakin geçti. Hiçbir şey olmadı.")
+
 # Karakter oluşturma
 player_name = input("Karakter adını girin: ")
 player_age = int(input("Karakter yaşını girin: "))
@@ -45,7 +78,7 @@ player_gender = input("Karakter cinsiyetini girin (Erkek/Kadın): ")
 player = Character(player_name, player_age, player_gender)
 player.display_info()
 
-# Yaşlanma
+# Yaşlanma ve rastgele olaylar
 player.age_up()
 player.display_info()
 
