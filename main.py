@@ -6,7 +6,7 @@ import random
 pygame.init()
 
 # Ekran boyutları
-WIDTH, HEIGHT = 800, 600
+WIDTH, HEIGHT = 1200, 1600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Life Simulator")
 
@@ -28,6 +28,10 @@ background_image = pygame.image.load("background.jpg")  # Arka plan resmi
 work_icon = pygame.image.load("work_icon.png")  # Çalış butonu ikonu
 school_icon = pygame.image.load("school_icon.png")  # Okula git butonu ikonu
 
+# Ses efektleri
+pygame.mixer.init()
+button_click_sound = pygame.mixer.Sound("click.wav")  # Buton tıklama sesi
+
 # Buton sınıfı
 class Button:
     def __init__(self, x, y, width, height, text, color, icon=None):
@@ -35,9 +39,14 @@ class Button:
         self.text = text
         self.color = color
         self.icon = icon
+        self.clicked = False
 
     def draw(self, screen):
-        pygame.draw.rect(screen, self.color, self.rect)
+        if self.clicked:
+            pygame.draw.rect(screen, (200, 200, 200), self.rect)  # Tıklandığında rengi değiştir
+        else:
+            pygame.draw.rect(screen, self.color, self.rect)
+        
         if self.icon:
             screen.blit(self.icon, (self.rect.x + 10, self.rect.y + 10))
         text_surface = font.render(self.text, True, BLACK)
@@ -46,6 +55,12 @@ class Button:
 
     def is_clicked(self, pos):
         return self.rect.collidepoint(pos)
+
+    def animate(self):
+        self.clicked = True
+        button_click_sound.play()  # Ses efekti çal
+        pygame.time.delay(100)  # Animasyon için kısa bir bekleme
+        self.clicked = False
 
 class Character:
     def __init__(self, name, age, gender):
@@ -179,6 +194,7 @@ while running:
             pos = pygame.mouse.get_pos()
             for button in buttons:
                 if button.is_clicked(pos):
+                    button.animate()  # Animasyonu tetikle
                     if button.text == "Yaşlan":
                         player.age_up()
                     elif button.text == "Çalış":
