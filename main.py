@@ -210,6 +210,21 @@ class Character:
             self.relationships["romantik"] = partner_name
             draw_animated_text(screen, f"{self.name}, {partner_name} ile romantik bir ilişkiye başladı!", 50, 300, PURPLE)
 
+    def choose_job(self):
+        if self.education_level == "Üniversite":
+            jobs = ["Doktor", "Mühendis", "Sanatçı", "Sporcu"]
+            draw_animated_text(screen, "Yeni bir meslek seç:", 50, 300, BLACK)
+            for i, job in enumerate(jobs):
+                draw_animated_text(screen, f"{i + 1}. {job}", 50, 350 + i * 40, BLACK)
+            choice = input("Seçiminizi yapın (1-4): ")
+            if choice.isdigit() and 1 <= int(choice) <= 4:
+                self.job = jobs[int(choice) - 1]
+                draw_animated_text(screen, f"{self.name} artık {self.job} olarak çalışıyor.", 50, 300, GREEN)
+            else:
+                draw_animated_text(screen, "Geçersiz seçim!", 50, 300, RED)
+        else:
+            draw_animated_text(screen, "Üniversite mezunu değilsiniz. Meslek seçemezsiniz.", 50, 300, RED)
+
 # Karakter oluşturma
 player = Character("Ahmet", 18, "Erkek")
 
@@ -220,7 +235,8 @@ buttons = [
     Button(450, 400, 150, 50, "Okula Git", RED),
     Button(50, 500, 150, 50, "Arkadaş Edin", YELLOW),
     Button(250, 500, 150, 50, "Aile Ekle", PURPLE),
-    Button(450, 500, 150, 50, "Romantik İlişki", RED)
+    Button(450, 500, 150, 50, "Romantik İlişki", RED),
+    Button(650, 500, 150, 50, "Meslek Seç", GREEN)
 ]
 
 # Oyun döngüsü
@@ -246,6 +262,8 @@ while running:
                         player.add_family_member()
                     elif button.text == "Romantik İlişki":
                         player.start_romantic_relationship()
+                    elif button.text == "Meslek Seç":
+                        player.choose_job()
 
     # Ekranı temizle
     screen.fill(WHITE)
