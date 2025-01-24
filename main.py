@@ -1,7 +1,6 @@
 import pygame
 import sys
 import random
-import time
 
 # Pygame başlatma
 pygame.init()
@@ -15,272 +14,153 @@ pygame.display.set_caption("Life Simulator")
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GREEN = (0, 255, 0)
-RED = (255, 0, 0)
 BLUE = (0, 0, 255)
+RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
 PURPLE = (128, 0, 128)
 
 # Fontlar
 font = pygame.font.Font(None, 36)
-
-# Metin animasyonu fonksiyonu
-def draw_animated_text(screen, text, x, y, color=BLACK, delay=0.05):
-    for i in range(len(text) + 1):
-        screen.fill(WHITE)  # Ekranı temizle
-        partial_text = text[:i]
-        text_surface = font.render(partial_text, True, color)
-        screen.blit(text_surface, (x, y))
-        pygame.display.flip()
-        time.sleep(delay)
+large_font = pygame.font.Font(None, 48)
 
 # Buton sınıfı
 class Button:
-    def __init__(self, x, y, width, height, text, color):
+    def __init__(self, x, y, width, height, text, color, hover_color):
         self.rect = pygame.Rect(x, y, width, height)
         self.text = text
         self.color = color
+        self.hover_color = hover_color
+        self.is_hovered = False
 
     def draw(self, screen):
-        pygame.draw.rect(screen, self.color, self.rect)
+        if self.is_hovered:
+            pygame.draw.rect(screen, self.hover_color, self.rect)
+        else:
+            pygame.draw.rect(screen, self.color, self.rect)
         text_surface = font.render(self.text, True, BLACK)
         text_rect = text_surface.get_rect(center=self.rect.center)
         screen.blit(text_surface, text_rect)
 
-    def is_clicked(self, pos):
-        return self.rect.collidepoint(pos)
+    def check_hover(self, pos):
+        self.is_hovered = self.rect.collidepoint(pos)
 
-class Character:
-    def __init__(self, name, age, gender):
+# Ana menü butonları
+buttons = [
+    Button(300, 200, 200, 50, "Oyna", GREEN, (0, 200, 0)),
+    Button(300, 300, 200, 50, "Yükle", BLUE, (0, 0, 200)),
+    Button(300, 400, 200, 50, "Ayarlar", RED, (200, 0, 0)),
+    Button(300, 500, 200, 50, "Çıkış", BLACK, (50, 50, 50))
+]
+
+# Ana menü döngüsü
+def main_menu():
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pos = pygame.mouse.get_pos()
+                for button in buttons:
+                    if button.is_clicked(pos):
+                        if button.text == "Oyna":
+                            return "play"
+                        elif button.text == "Çıkış":
+                            pygame.quit()
+                            sys.exit()
+
+        # Ekranı temizle
+        screen.fill(WHITE)
+
+        # Butonları çiz
+        for button in buttons:
+            button.draw(screen)
+
+        # Ekranı güncelle
+        pygame.display.flip()
+
+# Karakter oluşturma
+def character_creation():
+    name = input("Karakter adını girin: ")
+    gender = input("Cinsiyet seçin (Erkek/Kadın): ")
+    appearance = input("Görünüş seçin (1: Sporcu, 2: Şık, 3: Rahat): ")
+    print(f"{name} adlı {gender} karakter oluşturuldu! Görünüş: {appearance}")
+    return name, gender, appearance
+
+# Yaşam simülasyonu sınıfı
+class LifeSimulator:
+    def __init__(self, name, gender):
         self.name = name
-        self.age = age
         self.gender = gender
+        self.age = 0
         self.health = 100
         self.money = 0
-        self.job = "Öğrenci"
-        self.education_level = "İlkokul"
-        self.skills = {
-            "zeka": 50,
-            "fiziksel_güç": 50,
-            "sosyal_beceri": 50,
-            "sanat": 0,
-            "spor": 0
-        }
-        self.relationships = {
-            "arkadaşlar": [],
-            "aile": [],
-            "romantik": None
-        }
+        self.education = "Yok"
+        self.job = "Yok"
+        self.relationships = []
 
-    def display_info(self, screen):
-        y_offset = 50
-        info_lines = [
-            f"Ad: {self.name}, Yaş: {self.age}, Cinsiyet: {self.gender}",
-            f"Sağlık: {self.health}, Para: {self.money}, Meslek: {self.job}",
-            f"Eğitim Seviyesi: {self.education_level}",
-            f"Yetenekler: Zeka: {self.skills['zeka']}, Fiziksel Güç: {self.skills['fiziksel_güç']}, Sosyal Beceri: {self.skills['sosyal_beceri']}",
-            f"Sanat: {self.skills['sanat']}, Spor: {self.skills['spor']}",
-            f"İlişkiler: Arkadaşlar: {self.relationships['arkadaşlar']}, Aile: {self.relationships['aile']}, Romantik: {self.relationships['romantik']}"
-        ]
-        for line in info_lines:
-            text = font.render(line, True, BLACK)
-            screen.blit(text, (50, y_offset))
-            y_offset += 40
+    def display_status(self):
+        print(f"Ad: {self.name}, Yaş: {self.age}, Cinsiyet: {self.gender}")
+        print(f"Sağlık: {self.health}, Para: {self.money}")
+        print(f"Eğitim: {self.education}, Meslek: {self.job}")
+        print(f"İlişkiler: {self.relationships}")
 
     def age_up(self):
         self.age += 1
-        self.random_event()
+        print(f"{self.name} bir yaş büyüdü! Şimdi {self.age} yaşında.")
 
     def random_event(self):
         events = [
             self._get_sick,
-            self._have_accident,
-            self._win_lottery,
             self._find_money,
-            self._nothing_happens,
-            self._get_promoted,
-            self._lose_job,
-            self._learn_new_skill,
-            self._lose_friend,
-            self._family_member_gets_sick,
-            self._break_up
+            self._make_friend,
+            self._lose_friend
         ]
         random.choice(events)()
 
     def _get_sick(self):
-        self.health -= 20
-        draw_animated_text(screen, f"{self.name} hastalandı! Sağlık: {self.health}", 50, 300, RED)
-
-    def _have_accident(self):
-        self.health -= 30
-        self.money -= 50
-        draw_animated_text(screen, f"{self.name} kaza geçirdi! Sağlık: {self.health}, Para: {self.money}", 50, 300, RED)
-
-    def _win_lottery(self):
-        lottery_money = random.randint(1000, 5000)
-        self.money += lottery_money
-        draw_animated_text(screen, f"{self.name} piyangodan {lottery_money} TL kazandı! Toplam para: {self.money}", 50, 300, GREEN)
+        self.health -= 10
+        print(f"{self.name} hastalandı! Sağlık: {self.health}")
 
     def _find_money(self):
         found_money = random.randint(10, 100)
         self.money += found_money
-        draw_animated_text(screen, f"{self.name} yerde {found_money} TL buldu! Toplam para: {self.money}", 50, 300, GREEN)
+        print(f"{self.name} yerde {found_money} TL buldu! Toplam para: {self.money}")
 
-    def _nothing_happens(self):
-        draw_animated_text(screen, f"{self.name} için bu yıl sakin geçti. Hiçbir şey olmadı.", 50, 300, BLACK)
-
-    def _get_promoted(self):
-        if self.job != "Öğrenci":
-            self.money += 500
-            draw_animated_text(screen, f"{self.name} işinde terfi etti! Yeni maaş: {self.money} TL", 50, 300, GREEN)
-        else:
-            draw_animated_text(screen, f"{self.name} öğrenci olduğu için terfi edemez.", 50, 300, RED)
-
-    def _lose_job(self):
-        if self.job != "Öğrenci":
-            self.job = "İşsiz"
-            self.money -= 200
-            draw_animated_text(screen, f"{self.name} işten atıldı! Yeni durum: İşsiz, Para: {self.money} TL", 50, 300, RED)
-        else:
-            draw_animated_text(screen, f"{self.name} öğrenci olduğu için işten atılamaz.", 50, 300, RED)
-
-    def _learn_new_skill(self):
-        skill = random.choice(["sanat", "spor"])
-        self.skills[skill] += 20
-        draw_animated_text(screen, f"{self.name} yeni bir yetenek öğrendi: {skill.capitalize()}!", 50, 300, BLUE)
+    def _make_friend(self):
+        friend_name = f"Arkadaş {random.randint(1, 100)}"
+        self.relationships.append(friend_name)
+        print(f"{self.name}, {friend_name} ile arkadaş oldu!")
 
     def _lose_friend(self):
-        if self.relationships["arkadaşlar"]:
-            lost_friend = random.choice(self.relationships["arkadaşlar"])
-            self.relationships["arkadaşlar"].remove(lost_friend)
-            draw_animated_text(screen, f"{self.name}, {lost_friend} ile arkadaşlığını kaybetti.", 50, 300, RED)
+        if self.relationships:
+            lost_friend = random.choice(self.relationships)
+            self.relationships.remove(lost_friend)
+            print(f"{self.name}, {lost_friend} ile arkadaşlığını kaybetti.")
         else:
-            draw_animated_text(screen, f"{self.name}'in kaybedecek arkadaşı yok.", 50, 300, BLACK)
+            print(f"{self.name}'in kaybedecek arkadaşı yok.")
 
-    def _family_member_gets_sick(self):
-        if self.relationships["aile"]:
-            sick_member = random.choice(self.relationships["aile"])
-            self.money -= 100
-            draw_animated_text(screen, f"{sick_member} hastalandı! Sağlık harcamaları: 100 TL, Para: {self.money} TL", 50, 300, RED)
-        else:
-            draw_animated_text(screen, f"{self.name}'in ailesinde hastalanacak kimse yok.", 50, 300, BLACK)
+# Hikaye akışı
+def story_flow(player):
+    print(f"{player.name} adlı karakterin yaşamı başlıyor...")
+    for year in range(player.age, 100):
+        print(f"\n--- {year} Yaşında ---")
+        player.age_up()
+        player.random_event()
+        player.display_status()
+        if year == 6:
+            print("İlkokula başladın!")
+            player.education = "İlkokul"
+        elif year == 15:
+            print("Liseye başladın!")
+            player.education = "Lise"
+        elif year == 18:
+            print("Üniversiteye başladın!")
+            player.education = "Üniversite"
 
-    def _break_up(self):
-        if self.relationships["romantik"]:
-            partner = self.relationships["romantik"]
-            self.relationships["romantik"] = None
-            draw_animated_text(screen, f"{self.name}, {partner} ile ayrıldı.", 50, 300, RED)
-        else:
-            draw_animated_text(screen, f"{self.name}'in ayrılacak bir ilişkisi yok.", 50, 300, BLACK)
-
-    def go_to_school(self):
-        if self.education_level == "İlkokul":
-            self.education_level = "Lise"
-            self.skills["zeka"] += 20
-            draw_animated_text(screen, f"{self.name} liseye başladı! Zeka: {self.skills['zeka']}", 50, 300, BLUE)
-        elif self.education_level == "Lise":
-            self.education_level = "Üniversite"
-            self.skills["zeka"] += 30
-            draw_animated_text(screen, f"{self.name} üniversiteye başladı! Zeka: {self.skills['zeka']}", 50, 300, BLUE)
-        else:
-            draw_animated_text(screen, f"{self.name} zaten en yüksek eğitim seviyesinde.", 50, 300, BLACK)
-
-    def work(self):
-        if self.job == "Öğrenci":
-            draw_animated_text(screen, f"{self.name} öğrenci olduğu için çalışamıyor.", 50, 300, RED)
-        else:
-            earned_money = random.randint(50, 200)
-            self.money += earned_money
-            draw_animated_text(screen, f"{self.name} {earned_money} TL kazandı. Toplam para: {self.money} TL", 50, 300, GREEN)
-
-    def make_friend(self):
-        friend_name = f"Arkadaş {random.randint(1, 100)}"
-        self.relationships["arkadaşlar"].append(friend_name)
-        draw_animated_text(screen, f"{self.name}, {friend_name} ile arkadaş oldu!", 50, 300, YELLOW)
-
-    def add_family_member(self):
-        family_member = f"Aile Üyesi {random.randint(1, 100)}"
-        self.relationships["aile"].append(family_member)
-        draw_animated_text(screen, f"{family_member}, {self.name}'in ailesine eklendi.", 50, 300, PURPLE)
-
-    def start_romantic_relationship(self):
-        if self.relationships["romantik"]:
-            draw_animated_text(screen, f"{self.name} zaten {self.relationships['romantik']} ile bir ilişki içinde.", 50, 300, RED)
-        else:
-            partner_name = f"Partner {random.randint(1, 100)}"
-            self.relationships["romantik"] = partner_name
-            draw_animated_text(screen, f"{self.name}, {partner_name} ile romantik bir ilişkiye başladı!", 50, 300, PURPLE)
-
-    def choose_job(self):
-        if self.education_level == "Üniversite":
-            jobs = ["Doktor", "Mühendis", "Sanatçı", "Sporcu"]
-            draw_animated_text(screen, "Yeni bir meslek seç:", 50, 300, BLACK)
-            for i, job in enumerate(jobs):
-                draw_animated_text(screen, f"{i + 1}. {job}", 50, 350 + i * 40, BLACK)
-            choice = input("Seçiminizi yapın (1-4): ")
-            if choice.isdigit() and 1 <= int(choice) <= 4:
-                self.job = jobs[int(choice) - 1]
-                draw_animated_text(screen, f"{self.name} artık {self.job} olarak çalışıyor.", 50, 300, GREEN)
-            else:
-                draw_animated_text(screen, "Geçersiz seçim!", 50, 300, RED)
-        else:
-            draw_animated_text(screen, "Üniversite mezunu değilsiniz. Meslek seçemezsiniz.", 50, 300, RED)
-
-# Karakter oluşturma
-player = Character("Ahmet", 18, "Erkek")
-
-# Butonlar
-buttons = [
-    Button(50, 400, 150, 50, "Yaşlan", GREEN),
-    Button(250, 400, 150, 50, "Çalış", BLUE),
-    Button(450, 400, 150, 50, "Okula Git", RED),
-    Button(50, 500, 150, 50, "Arkadaş Edin", YELLOW),
-    Button(250, 500, 150, 50, "Aile Ekle", PURPLE),
-    Button(450, 500, 150, 50, "Romantik İlişki", RED),
-    Button(650, 500, 150, 50, "Meslek Seç", GREEN)
-]
-
-# Oyun döngüsü
-clock = pygame.time.Clock()
-running = True
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            pos = pygame.mouse.get_pos()
-            for button in buttons:
-                if button.is_clicked(pos):
-                    if button.text == "Yaşlan":
-                        player.age_up()
-                    elif button.text == "Çalış":
-                        player.work()
-                    elif button.text == "Okula Git":
-                        player.go_to_school()
-                    elif button.text == "Arkadaş Edin":
-                        player.make_friend()
-                    elif button.text == "Aile Ekle":
-                        player.add_family_member()
-                    elif button.text == "Romantik İlişki":
-                        player.start_romantic_relationship()
-                    elif button.text == "Meslek Seç":
-                        player.choose_job()
-
-    # Ekranı temizle
-    screen.fill(WHITE)
-
-    # Karakter bilgilerini göster
-    player.display_info(screen)
-
-    # Butonları çiz
-    for button in buttons:
-        button.draw(screen)
-
-    # Ekranı güncelle
-    pygame.display.flip()
-
-    # FPS ayarı
-    clock.tick(30)
-
-# Pygame'i kapat
-pygame.quit()
-sys.exit()
+# Oyunu başlat
+if main_menu() == "play":
+    name, gender, appearance = character_creation()
+    player = LifeSimulator(name, gender)
+    player.display_status()
+    story_flow(player)
