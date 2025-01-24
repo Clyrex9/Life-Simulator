@@ -8,10 +8,18 @@ class Character:
         self.health = 100
         self.money = 0
         self.job = "Öğrenci"
+        self.education_level = "İlkokul"
+        self.skills = {
+            "zeka": 50,
+            "fiziksel_güç": 50,
+            "sosyal_beceri": 50
+        }
 
     def display_info(self):
         print(f"Ad: {self.name}, Yaş: {self.age}, Cinsiyet: {self.gender}")
         print(f"Sağlık: {self.health}, Para: {self.money}, Meslek: {self.job}")
+        print(f"Eğitim Seviyesi: {self.education_level}")
+        print(f"Yetenekler: Zeka: {self.skills['zeka']}, Fiziksel Güç: {self.skills['fiziksel_güç']}, Sosyal Beceri: {self.skills['sosyal_beceri']}")
 
     def age_up(self):
         self.age += 1
@@ -70,6 +78,18 @@ class Character:
     def _nothing_happens(self):
         print(f"{self.name} için bu yıl sakin geçti. Hiçbir şey olmadı.")
 
+    def go_to_school(self):
+        if self.education_level == "İlkokul":
+            self.education_level = "Lise"
+            self.skills["zeka"] += 20
+            print(f"{self.name} liseye başladı! Zeka: {self.skills['zeka']}")
+        elif self.education_level == "Lise":
+            self.education_level = "Üniversite"
+            self.skills["zeka"] += 30
+            print(f"{self.name} üniversiteye başladı! Zeka: {self.skills['zeka']}")
+        else:
+            print(f"{self.name} zaten en yüksek eğitim seviyesinde.")
+
 # Karakter oluşturma
 player_name = input("Karakter adını girin: ")
 player_age = int(input("Karakter yaşını girin: "))
@@ -84,6 +104,10 @@ player.display_info()
 
 # Sağlık kontrolü
 player.check_health()
+
+# Eğitim alma
+player.go_to_school()
+player.display_info()
 
 # Meslek değiştirme
 player.change_job("Mühendis")
