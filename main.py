@@ -6,7 +6,7 @@ import random
 pygame.init()
 
 # Ekran boyutları
-WIDTH, HEIGHT = 1200, 1600
+WIDTH, HEIGHT = 800, 600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Life Simulator")
 
@@ -31,6 +31,8 @@ school_icon = pygame.image.load("school_icon.png")  # Okula git butonu ikonu
 # Ses efektleri
 pygame.mixer.init()
 button_click_sound = pygame.mixer.Sound("click.wav")  # Buton tıklama sesi
+work_sound = pygame.mixer.Sound("work.wav")  # Çalışma sesi
+school_sound = pygame.mixer.Sound("school.wav")  # Okula gitme sesi
 
 # Buton sınıfı
 class Button:
@@ -40,10 +42,25 @@ class Button:
         self.color = color
         self.icon = icon
         self.clicked = False
+        self.animation_frame = 0
 
     def draw(self, screen):
         if self.clicked:
-            pygame.draw.rect(screen, (200, 200, 200), self.rect)  # Tıklandığında rengi değiştir
+            # Animasyon sırasında butonun boyutunu değiştir
+            scale_factor = 1 + 0.1 * (self.animation_frame % 10 - 5)
+            scaled_width = int(self.rect.width * scale_factor)
+            scaled_height = int(self.rect.height * scale_factor)
+            scaled_rect = pygame.Rect(
+                self.rect.x - (scaled_width - self.rect.width) // 2,
+                self.rect.y - (scaled_height - self.rect.height) // 2,
+                scaled_width,
+                scaled_height
+            )
+            pygame.draw.rect(screen, (200, 200, 200), scaled_rect)  # Tıklandığında rengi değiştir
+            self.animation_frame += 1
+            if self.animation_frame >= 10:
+                self.clicked = False
+                self.animation_frame = 0
         else:
             pygame.draw.rect(screen, self.color, self.rect)
         
@@ -59,8 +76,6 @@ class Button:
     def animate(self):
         self.clicked = True
         button_click_sound.play()  # Ses efekti çal
-        pygame.time.delay(100)  # Animasyon için kısa bir bekleme
-        self.clicked = False
 
 class Character:
     def __init__(self, name, age, gender):
@@ -143,6 +158,7 @@ class Character:
             print(f"{self.name} üniversiteye başladı! Zeka: {self.skills['zeka']}")
         else:
             print(f"{self.name} zaten en yüksek eğitim seviyesinde.")
+        school_sound.play()  # Okula gitme sesi
 
     def work(self):
         if self.job == "Öğrenci":
@@ -151,6 +167,7 @@ class Character:
             earned_money = random.randint(50, 200)
             self.money += earned_money
             print(f"{self.name} {earned_money} TL kazandı. Toplam para: {self.money} TL")
+        work_sound.play()  # Çalışma sesi
 
     def make_friend(self):
         friend_name = f"Arkadaş {random.randint(1, 100)}"
