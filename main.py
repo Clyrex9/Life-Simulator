@@ -14,12 +14,18 @@ class Character:
             "fiziksel_güç": 50,
             "sosyal_beceri": 50
         }
+        self.relationships = {
+            "arkadaşlar": [],
+            "aile": [],
+            "romantik": None
+        }
 
     def display_info(self):
         print(f"Ad: {self.name}, Yaş: {self.age}, Cinsiyet: {self.gender}")
         print(f"Sağlık: {self.health}, Para: {self.money}, Meslek: {self.job}")
         print(f"Eğitim Seviyesi: {self.education_level}")
         print(f"Yetenekler: Zeka: {self.skills['zeka']}, Fiziksel Güç: {self.skills['fiziksel_güç']}, Sosyal Beceri: {self.skills['sosyal_beceri']}")
+        print(f"İlişkiler: Arkadaşlar: {self.relationships['arkadaşlar']}, Aile: {self.relationships['aile']}, Romantik: {self.relationships['romantik']}")
 
     def age_up(self):
         self.age += 1
@@ -90,6 +96,21 @@ class Character:
         else:
             print(f"{self.name} zaten en yüksek eğitim seviyesinde.")
 
+    def make_friend(self, friend_name):
+        self.relationships["arkadaşlar"].append(friend_name)
+        print(f"{self.name}, {friend_name} ile arkadaş oldu!")
+
+    def add_family_member(self, family_member):
+        self.relationships["aile"].append(family_member)
+        print(f"{family_member}, {self.name}'in ailesine eklendi.")
+
+    def start_romantic_relationship(self, partner_name):
+        if self.relationships["romantik"]:
+            print(f"{self.name} zaten {self.relationships['romantik']} ile bir ilişki içinde.")
+        else:
+            self.relationships["romantik"] = partner_name
+            print(f"{self.name}, {partner_name} ile romantik bir ilişkiye başladı!")
+
 # Karakter oluşturma
 player_name = input("Karakter adını girin: ")
 player_age = int(input("Karakter yaşını girin: "))
@@ -115,4 +136,16 @@ player.display_info()
 
 # Çalışma
 player.work()
+player.display_info()
+
+# Arkadaş edinme
+player.make_friend("Ayşe")
+player.display_info()
+
+# Aile üyesi ekleme
+player.add_family_member("Ali")
+player.display_info()
+
+# Romantik ilişki başlatma
+player.start_romantic_relationship("Zeynep")
 player.display_info()
