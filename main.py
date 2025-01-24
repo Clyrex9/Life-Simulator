@@ -1,4 +1,23 @@
+import pygame
+import sys
 import random
+
+# Pygame başlatma
+pygame.init()
+
+# Ekran boyutları
+WIDTH, HEIGHT = 800, 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Life Simulator")
+
+# Renkler
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+GREEN = (0, 255, 0)
+RED = (255, 0, 0)
+
+# Fontlar
+font = pygame.font.Font(None, 36)
 
 class Character:
     def __init__(self, name, age, gender):
@@ -20,37 +39,23 @@ class Character:
             "romantik": None
         }
 
-    def display_info(self):
-        print(f"Ad: {self.name}, Yaş: {self.age}, Cinsiyet: {self.gender}")
-        print(f"Sağlık: {self.health}, Para: {self.money}, Meslek: {self.job}")
-        print(f"Eğitim Seviyesi: {self.education_level}")
-        print(f"Yetenekler: Zeka: {self.skills['zeka']}, Fiziksel Güç: {self.skills['fiziksel_güç']}, Sosyal Beceri: {self.skills['sosyal_beceri']}")
-        print(f"İlişkiler: Arkadaşlar: {self.relationships['arkadaşlar']}, Aile: {self.relationships['aile']}, Romantik: {self.relationships['romantik']}")
+    def display_info(self, screen):
+        y_offset = 50
+        info_lines = [
+            f"Ad: {self.name}, Yaş: {self.age}, Cinsiyet: {self.gender}",
+            f"Sağlık: {self.health}, Para: {self.money}, Meslek: {self.job}",
+            f"Eğitim Seviyesi: {self.education_level}",
+            f"Yetenekler: Zeka: {self.skills['zeka']}, Fiziksel Güç: {self.skills['fiziksel_güç']}, Sosyal Beceri: {self.skills['sosyal_beceri']}",
+            f"İlişkiler: Arkadaşlar: {self.relationships['arkadaşlar']}, Aile: {self.relationships['aile']}, Romantik: {self.relationships['romantik']}"
+        ]
+        for line in info_lines:
+            text = font.render(line, True, BLACK)
+            screen.blit(text, (50, y_offset))
+            y_offset += 40
 
     def age_up(self):
         self.age += 1
-        print(f"{self.name} bir yaş büyüdü! Şimdi {self.age} yaşında.")
-        self.random_event()  # Yaşlanınca rastgele bir olay tetikle
-
-    def check_health(self):
-        if self.health > 70:
-            print(f"{self.name} sağlıklı görünüyor.")
-        elif self.health > 30:
-            print(f"{self.name} biraz hasta görünüyor.")
-        else:
-            print(f"{self.name} çok hasta! Acilen doktora gitmeli.")
-
-    def work(self):
-        if self.job == "Öğrenci":
-            print(f"{self.name} öğrenci olduğu için çalışamıyor.")
-        else:
-            earned_money = random.randint(50, 200)
-            self.money += earned_money
-            print(f"{self.name} {earned_money} TL kazandı. Toplam para: {self.money} TL")
-
-    def change_job(self, new_job):
-        self.job = new_job
-        print(f"{self.name} artık {self.job} olarak çalışıyor.")
+        self.random_event()
 
     def random_event(self):
         events = [
@@ -60,7 +65,7 @@ class Character:
             self._find_money,
             self._nothing_happens
         ]
-        random.choice(events)()  # Rastgele bir olay seç ve tetikle
+        random.choice(events)()
 
     def _get_sick(self):
         self.health -= 20
@@ -84,68 +89,32 @@ class Character:
     def _nothing_happens(self):
         print(f"{self.name} için bu yıl sakin geçti. Hiçbir şey olmadı.")
 
-    def go_to_school(self):
-        if self.education_level == "İlkokul":
-            self.education_level = "Lise"
-            self.skills["zeka"] += 20
-            print(f"{self.name} liseye başladı! Zeka: {self.skills['zeka']}")
-        elif self.education_level == "Lise":
-            self.education_level = "Üniversite"
-            self.skills["zeka"] += 30
-            print(f"{self.name} üniversiteye başladı! Zeka: {self.skills['zeka']}")
-        else:
-            print(f"{self.name} zaten en yüksek eğitim seviyesinde.")
-
-    def make_friend(self, friend_name):
-        self.relationships["arkadaşlar"].append(friend_name)
-        print(f"{self.name}, {friend_name} ile arkadaş oldu!")
-
-    def add_family_member(self, family_member):
-        self.relationships["aile"].append(family_member)
-        print(f"{family_member}, {self.name}'in ailesine eklendi.")
-
-    def start_romantic_relationship(self, partner_name):
-        if self.relationships["romantik"]:
-            print(f"{self.name} zaten {self.relationships['romantik']} ile bir ilişki içinde.")
-        else:
-            self.relationships["romantik"] = partner_name
-            print(f"{self.name}, {partner_name} ile romantik bir ilişkiye başladı!")
-
 # Karakter oluşturma
-player_name = input("Karakter adını girin: ")
-player_age = int(input("Karakter yaşını girin: "))
-player_gender = input("Karakter cinsiyetini girin (Erkek/Kadın): ")
+player = Character("Ahmet", 18, "Erkek")
 
-player = Character(player_name, player_age, player_gender)
-player.display_info()
+# Oyun döngüsü
+clock = pygame.time.Clock()
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                player.age_up()
 
-# Yaşlanma ve rastgele olaylar
-player.age_up()
-player.display_info()
+    # Ekranı temizle
+    screen.fill(WHITE)
 
-# Sağlık kontrolü
-player.check_health()
+    # Karakter bilgilerini göster
+    player.display_info(screen)
 
-# Eğitim alma
-player.go_to_school()
-player.display_info()
+    # Ekranı güncelle
+    pygame.display.flip()
 
-# Meslek değiştirme
-player.change_job("Mühendis")
-player.display_info()
+    # FPS ayarı
+    clock.tick(30)
 
-# Çalışma
-player.work()
-player.display_info()
-
-# Arkadaş edinme
-player.make_friend("Ayşe")
-player.display_info()
-
-# Aile üyesi ekleme
-player.add_family_member("Ali")
-player.display_info()
-
-# Romantik ilişki başlatma
-player.start_romantic_relationship("Zeynep")
-player.display_info()
+# Pygame'i kapat
+pygame.quit()
+sys.exit()
