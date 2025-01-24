@@ -61,7 +61,9 @@ class Character:
         self.skills = {
             "zeka": 50,
             "fiziksel_güç": 50,
-            "sosyal_beceri": 50
+            "sosyal_beceri": 50,
+            "sanat": 0,
+            "spor": 0
         }
         self.relationships = {
             "arkadaşlar": [],
@@ -76,6 +78,7 @@ class Character:
             f"Sağlık: {self.health}, Para: {self.money}, Meslek: {self.job}",
             f"Eğitim Seviyesi: {self.education_level}",
             f"Yetenekler: Zeka: {self.skills['zeka']}, Fiziksel Güç: {self.skills['fiziksel_güç']}, Sosyal Beceri: {self.skills['sosyal_beceri']}",
+            f"Sanat: {self.skills['sanat']}, Spor: {self.skills['spor']}",
             f"İlişkiler: Arkadaşlar: {self.relationships['arkadaşlar']}, Aile: {self.relationships['aile']}, Romantik: {self.relationships['romantik']}"
         ]
         for line in info_lines:
@@ -93,7 +96,13 @@ class Character:
             self._have_accident,
             self._win_lottery,
             self._find_money,
-            self._nothing_happens
+            self._nothing_happens,
+            self._get_promoted,
+            self._lose_job,
+            self._learn_new_skill,
+            self._lose_friend,
+            self._family_member_gets_sick,
+            self._break_up
         ]
         random.choice(events)()
 
@@ -118,6 +127,50 @@ class Character:
 
     def _nothing_happens(self):
         draw_animated_text(screen, f"{self.name} için bu yıl sakin geçti. Hiçbir şey olmadı.", 50, 300, BLACK)
+
+    def _get_promoted(self):
+        if self.job != "Öğrenci":
+            self.money += 500
+            draw_animated_text(screen, f"{self.name} işinde terfi etti! Yeni maaş: {self.money} TL", 50, 300, GREEN)
+        else:
+            draw_animated_text(screen, f"{self.name} öğrenci olduğu için terfi edemez.", 50, 300, RED)
+
+    def _lose_job(self):
+        if self.job != "Öğrenci":
+            self.job = "İşsiz"
+            self.money -= 200
+            draw_animated_text(screen, f"{self.name} işten atıldı! Yeni durum: İşsiz, Para: {self.money} TL", 50, 300, RED)
+        else:
+            draw_animated_text(screen, f"{self.name} öğrenci olduğu için işten atılamaz.", 50, 300, RED)
+
+    def _learn_new_skill(self):
+        skill = random.choice(["sanat", "spor"])
+        self.skills[skill] += 20
+        draw_animated_text(screen, f"{self.name} yeni bir yetenek öğrendi: {skill.capitalize()}!", 50, 300, BLUE)
+
+    def _lose_friend(self):
+        if self.relationships["arkadaşlar"]:
+            lost_friend = random.choice(self.relationships["arkadaşlar"])
+            self.relationships["arkadaşlar"].remove(lost_friend)
+            draw_animated_text(screen, f"{self.name}, {lost_friend} ile arkadaşlığını kaybetti.", 50, 300, RED)
+        else:
+            draw_animated_text(screen, f"{self.name}'in kaybedecek arkadaşı yok.", 50, 300, BLACK)
+
+    def _family_member_gets_sick(self):
+        if self.relationships["aile"]:
+            sick_member = random.choice(self.relationships["aile"])
+            self.money -= 100
+            draw_animated_text(screen, f"{sick_member} hastalandı! Sağlık harcamaları: 100 TL, Para: {self.money} TL", 50, 300, RED)
+        else:
+            draw_animated_text(screen, f"{self.name}'in ailesinde hastalanacak kimse yok.", 50, 300, BLACK)
+
+    def _break_up(self):
+        if self.relationships["romantik"]:
+            partner = self.relationships["romantik"]
+            self.relationships["romantik"] = None
+            draw_animated_text(screen, f"{self.name}, {partner} ile ayrıldı.", 50, 300, RED)
+        else:
+            draw_animated_text(screen, f"{self.name}'in ayrılacak bir ilişkisi yok.", 50, 300, BLACK)
 
     def go_to_school(self):
         if self.education_level == "İlkokul":
