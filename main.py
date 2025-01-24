@@ -16,6 +16,8 @@ BLACK = (0, 0, 0)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
+YELLOW = (255, 255, 0)
+PURPLE = (128, 0, 128)
 
 # Fontlar
 font = pygame.font.Font(None, 36)
@@ -126,6 +128,24 @@ class Character:
             self.money += earned_money
             print(f"{self.name} {earned_money} TL kazandı. Toplam para: {self.money} TL")
 
+    def make_friend(self):
+        friend_name = f"Arkadaş {random.randint(1, 100)}"
+        self.relationships["arkadaşlar"].append(friend_name)
+        print(f"{self.name}, {friend_name} ile arkadaş oldu!")
+
+    def add_family_member(self):
+        family_member = f"Aile Üyesi {random.randint(1, 100)}"
+        self.relationships["aile"].append(family_member)
+        print(f"{family_member}, {self.name}'in ailesine eklendi.")
+
+    def start_romantic_relationship(self):
+        if self.relationships["romantik"]:
+            print(f"{self.name} zaten {self.relationships['romantik']} ile bir ilişki içinde.")
+        else:
+            partner_name = f"Partner {random.randint(1, 100)}"
+            self.relationships["romantik"] = partner_name
+            print(f"{self.name}, {partner_name} ile romantik bir ilişkiye başladı!")
+
 # Karakter oluşturma
 player = Character("Ahmet", 18, "Erkek")
 
@@ -133,7 +153,10 @@ player = Character("Ahmet", 18, "Erkek")
 buttons = [
     Button(50, 400, 150, 50, "Yaşlan", GREEN),
     Button(250, 400, 150, 50, "Çalış", BLUE),
-    Button(450, 400, 150, 50, "Okula Git", RED)
+    Button(450, 400, 150, 50, "Okula Git", RED),
+    Button(50, 500, 150, 50, "Arkadaş Edin", YELLOW),
+    Button(250, 500, 150, 50, "Aile Ekle", PURPLE),
+    Button(450, 500, 150, 50, "Romantik İlişki", RED)
 ]
 
 # Oyun döngüsü
@@ -153,6 +176,12 @@ while running:
                         player.work()
                     elif button.text == "Okula Git":
                         player.go_to_school()
+                    elif button.text == "Arkadaş Edin":
+                        player.make_friend()
+                    elif button.text == "Aile Ekle":
+                        player.add_family_member()
+                    elif button.text == "Romantik İlişki":
+                        player.start_romantic_relationship()
 
     # Ekranı temizle
     screen.fill(WHITE)
