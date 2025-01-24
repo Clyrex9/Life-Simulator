@@ -1,6 +1,7 @@
 import pygame
 import sys
 import random
+import time
 
 # Pygame başlatma
 pygame.init()
@@ -22,60 +23,31 @@ PURPLE = (128, 0, 128)
 # Fontlar
 font = pygame.font.Font(None, 36)
 
-# Görsel öğeler
-character_image = pygame.image.load("character.png")  # Karakter resmi
-background_image = pygame.image.load("background.jpg")  # Arka plan resmi
-work_icon = pygame.image.load("work_icon.png")  # Çalış butonu ikonu
-school_icon = pygame.image.load("school_icon.png")  # Okula git butonu ikonu
-
-# Ses efektleri
-pygame.mixer.init()
-button_click_sound = pygame.mixer.Sound("click.wav")  # Buton tıklama sesi
-work_sound = pygame.mixer.Sound("work.wav")  # Çalışma sesi
-school_sound = pygame.mixer.Sound("school.wav")  # Okula gitme sesi
+# Metin animasyonu fonksiyonu
+def draw_animated_text(screen, text, x, y, color=BLACK, delay=0.05):
+    for i in range(len(text) + 1):
+        screen.fill(WHITE)  # Ekranı temizle
+        partial_text = text[:i]
+        text_surface = font.render(partial_text, True, color)
+        screen.blit(text_surface, (x, y))
+        pygame.display.flip()
+        time.sleep(delay)
 
 # Buton sınıfı
 class Button:
-    def __init__(self, x, y, width, height, text, color, icon=None):
+    def __init__(self, x, y, width, height, text, color):
         self.rect = pygame.Rect(x, y, width, height)
         self.text = text
         self.color = color
-        self.icon = icon
-        self.clicked = False
-        self.animation_frame = 0
 
     def draw(self, screen):
-        if self.clicked:
-            # Animasyon sırasında butonun boyutunu değiştir
-            scale_factor = 1 + 0.1 * (self.animation_frame % 10 - 5)
-            scaled_width = int(self.rect.width * scale_factor)
-            scaled_height = int(self.rect.height * scale_factor)
-            scaled_rect = pygame.Rect(
-                self.rect.x - (scaled_width - self.rect.width) // 2,
-                self.rect.y - (scaled_height - self.rect.height) // 2,
-                scaled_width,
-                scaled_height
-            )
-            pygame.draw.rect(screen, (200, 200, 200), scaled_rect)  # Tıklandığında rengi değiştir
-            self.animation_frame += 1
-            if self.animation_frame >= 10:
-                self.clicked = False
-                self.animation_frame = 0
-        else:
-            pygame.draw.rect(screen, self.color, self.rect)
-        
-        if self.icon:
-            screen.blit(self.icon, (self.rect.x + 10, self.rect.y + 10))
+        pygame.draw.rect(screen, self.color, self.rect)
         text_surface = font.render(self.text, True, BLACK)
         text_rect = text_surface.get_rect(center=self.rect.center)
         screen.blit(text_surface, text_rect)
 
     def is_clicked(self, pos):
         return self.rect.collidepoint(pos)
-
-    def animate(self):
-        self.clicked = True
-        button_click_sound.play()  # Ses efekti çal
 
 class Character:
     def __init__(self, name, age, gender):
@@ -127,65 +99,63 @@ class Character:
 
     def _get_sick(self):
         self.health -= 20
-        print(f"{self.name} hastalandı! Sağlık: {self.health}")
+        draw_animated_text(screen, f"{self.name} hastalandı! Sağlık: {self.health}", 50, 300, RED)
 
     def _have_accident(self):
         self.health -= 30
         self.money -= 50
-        print(f"{self.name} kaza geçirdi! Sağlık: {self.health}, Para: {self.money}")
+        draw_animated_text(screen, f"{self.name} kaza geçirdi! Sağlık: {self.health}, Para: {self.money}", 50, 300, RED)
 
     def _win_lottery(self):
         lottery_money = random.randint(1000, 5000)
         self.money += lottery_money
-        print(f"{self.name} piyangodan {lottery_money} TL kazandı! Toplam para: {self.money}")
+        draw_animated_text(screen, f"{self.name} piyangodan {lottery_money} TL kazandı! Toplam para: {self.money}", 50, 300, GREEN)
 
     def _find_money(self):
         found_money = random.randint(10, 100)
         self.money += found_money
-        print(f"{self.name} yerde {found_money} TL buldu! Toplam para: {self.money}")
+        draw_animated_text(screen, f"{self.name} yerde {found_money} TL buldu! Toplam para: {self.money}", 50, 300, GREEN)
 
     def _nothing_happens(self):
-        print(f"{self.name} için bu yıl sakin geçti. Hiçbir şey olmadı.")
+        draw_animated_text(screen, f"{self.name} için bu yıl sakin geçti. Hiçbir şey olmadı.", 50, 300, BLACK)
 
     def go_to_school(self):
         if self.education_level == "İlkokul":
             self.education_level = "Lise"
             self.skills["zeka"] += 20
-            print(f"{self.name} liseye başladı! Zeka: {self.skills['zeka']}")
+            draw_animated_text(screen, f"{self.name} liseye başladı! Zeka: {self.skills['zeka']}", 50, 300, BLUE)
         elif self.education_level == "Lise":
             self.education_level = "Üniversite"
             self.skills["zeka"] += 30
-            print(f"{self.name} üniversiteye başladı! Zeka: {self.skills['zeka']}")
+            draw_animated_text(screen, f"{self.name} üniversiteye başladı! Zeka: {self.skills['zeka']}", 50, 300, BLUE)
         else:
-            print(f"{self.name} zaten en yüksek eğitim seviyesinde.")
-        school_sound.play()  # Okula gitme sesi
+            draw_animated_text(screen, f"{self.name} zaten en yüksek eğitim seviyesinde.", 50, 300, BLACK)
 
     def work(self):
         if self.job == "Öğrenci":
-            print(f"{self.name} öğrenci olduğu için çalışamıyor.")
+            draw_animated_text(screen, f"{self.name} öğrenci olduğu için çalışamıyor.", 50, 300, RED)
         else:
             earned_money = random.randint(50, 200)
             self.money += earned_money
-            print(f"{self.name} {earned_money} TL kazandı. Toplam para: {self.money} TL")
-        work_sound.play()  # Çalışma sesi
+            draw_animated_text(screen, f"{self.name} {earned_money} TL kazandı. Toplam para: {self.money} TL", 50, 300, GREEN)
 
     def make_friend(self):
         friend_name = f"Arkadaş {random.randint(1, 100)}"
         self.relationships["arkadaşlar"].append(friend_name)
-        print(f"{self.name}, {friend_name} ile arkadaş oldu!")
+        draw_animated_text(screen, f"{self.name}, {friend_name} ile arkadaş oldu!", 50, 300, YELLOW)
 
     def add_family_member(self):
         family_member = f"Aile Üyesi {random.randint(1, 100)}"
         self.relationships["aile"].append(family_member)
-        print(f"{family_member}, {self.name}'in ailesine eklendi.")
+        draw_animated_text(screen, f"{family_member}, {self.name}'in ailesine eklendi.", 50, 300, PURPLE)
 
     def start_romantic_relationship(self):
         if self.relationships["romantik"]:
-            print(f"{self.name} zaten {self.relationships['romantik']} ile bir ilişki içinde.")
+            draw_animated_text(screen, f"{self.name} zaten {self.relationships['romantik']} ile bir ilişki içinde.", 50, 300, RED)
         else:
             partner_name = f"Partner {random.randint(1, 100)}"
             self.relationships["romantik"] = partner_name
-            print(f"{self.name}, {partner_name} ile romantik bir ilişkiye başladı!")
+            draw_animated_text(screen, f"{self.name}, {partner_name} ile romantik bir ilişkiye başladı!", 50, 300, PURPLE)
 
 # Karakter oluşturma
 player = Character("Ahmet", 18, "Erkek")
@@ -193,8 +163,8 @@ player = Character("Ahmet", 18, "Erkek")
 # Butonlar
 buttons = [
     Button(50, 400, 150, 50, "Yaşlan", GREEN),
-    Button(250, 400, 150, 50, "Çalış", BLUE, work_icon),
-    Button(450, 400, 150, 50, "Okula Git", RED, school_icon),
+    Button(250, 400, 150, 50, "Çalış", BLUE),
+    Button(450, 400, 150, 50, "Okula Git", RED),
     Button(50, 500, 150, 50, "Arkadaş Edin", YELLOW),
     Button(250, 500, 150, 50, "Aile Ekle", PURPLE),
     Button(450, 500, 150, 50, "Romantik İlişki", RED)
@@ -211,7 +181,6 @@ while running:
             pos = pygame.mouse.get_pos()
             for button in buttons:
                 if button.is_clicked(pos):
-                    button.animate()  # Animasyonu tetikle
                     if button.text == "Yaşlan":
                         player.age_up()
                     elif button.text == "Çalış":
@@ -225,11 +194,8 @@ while running:
                     elif button.text == "Romantik İlişki":
                         player.start_romantic_relationship()
 
-    # Arka planı çiz
-    screen.blit(background_image, (0, 0))
-
-    # Karakter resmini çiz
-    screen.blit(character_image, (600, 50))
+    # Ekranı temizle
+    screen.fill(WHITE)
 
     # Karakter bilgilerini göster
     player.display_info(screen)
