@@ -15,9 +15,26 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
+BLUE = (0, 0, 255)
 
 # Fontlar
 font = pygame.font.Font(None, 36)
+
+# Buton sınıfı
+class Button:
+    def __init__(self, x, y, width, height, text, color):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.text = text
+        self.color = color
+
+    def draw(self, screen):
+        pygame.draw.rect(screen, self.color, self.rect)
+        text_surface = font.render(self.text, True, BLACK)
+        text_rect = text_surface.get_rect(center=self.rect.center)
+        screen.blit(text_surface, text_rect)
+
+    def is_clicked(self, pos):
+        return self.rect.collidepoint(pos)
 
 class Character:
     def __init__(self, name, age, gender):
@@ -89,8 +106,35 @@ class Character:
     def _nothing_happens(self):
         print(f"{self.name} için bu yıl sakin geçti. Hiçbir şey olmadı.")
 
+    def go_to_school(self):
+        if self.education_level == "İlkokul":
+            self.education_level = "Lise"
+            self.skills["zeka"] += 20
+            print(f"{self.name} liseye başladı! Zeka: {self.skills['zeka']}")
+        elif self.education_level == "Lise":
+            self.education_level = "Üniversite"
+            self.skills["zeka"] += 30
+            print(f"{self.name} üniversiteye başladı! Zeka: {self.skills['zeka']}")
+        else:
+            print(f"{self.name} zaten en yüksek eğitim seviyesinde.")
+
+    def work(self):
+        if self.job == "Öğrenci":
+            print(f"{self.name} öğrenci olduğu için çalışamıyor.")
+        else:
+            earned_money = random.randint(50, 200)
+            self.money += earned_money
+            print(f"{self.name} {earned_money} TL kazandı. Toplam para: {self.money} TL")
+
 # Karakter oluşturma
 player = Character("Ahmet", 18, "Erkek")
+
+# Butonlar
+buttons = [
+    Button(50, 400, 150, 50, "Yaşlan", GREEN),
+    Button(250, 400, 150, 50, "Çalış", BLUE),
+    Button(450, 400, 150, 50, "Okula Git", RED)
+]
 
 # Oyun döngüsü
 clock = pygame.time.Clock()
@@ -99,15 +143,26 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                player.age_up()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            pos = pygame.mouse.get_pos()
+            for button in buttons:
+                if button.is_clicked(pos):
+                    if button.text == "Yaşlan":
+                        player.age_up()
+                    elif button.text == "Çalış":
+                        player.work()
+                    elif button.text == "Okula Git":
+                        player.go_to_school()
 
     # Ekranı temizle
     screen.fill(WHITE)
 
     # Karakter bilgilerini göster
     player.display_info(screen)
+
+    # Butonları çiz
+    for button in buttons:
+        button.draw(screen)
 
     # Ekranı güncelle
     pygame.display.flip()
