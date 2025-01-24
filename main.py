@@ -22,15 +22,24 @@ PURPLE = (128, 0, 128)
 # Fontlar
 font = pygame.font.Font(None, 36)
 
+# Görsel öğeler
+character_image = pygame.image.load("character.png")  # Karakter resmi
+background_image = pygame.image.load("background.jpg")  # Arka plan resmi
+work_icon = pygame.image.load("work_icon.png")  # Çalış butonu ikonu
+school_icon = pygame.image.load("school_icon.png")  # Okula git butonu ikonu
+
 # Buton sınıfı
 class Button:
-    def __init__(self, x, y, width, height, text, color):
+    def __init__(self, x, y, width, height, text, color, icon=None):
         self.rect = pygame.Rect(x, y, width, height)
         self.text = text
         self.color = color
+        self.icon = icon
 
     def draw(self, screen):
         pygame.draw.rect(screen, self.color, self.rect)
+        if self.icon:
+            screen.blit(self.icon, (self.rect.x + 10, self.rect.y + 10))
         text_surface = font.render(self.text, True, BLACK)
         text_rect = text_surface.get_rect(center=self.rect.center)
         screen.blit(text_surface, text_rect)
@@ -152,8 +161,8 @@ player = Character("Ahmet", 18, "Erkek")
 # Butonlar
 buttons = [
     Button(50, 400, 150, 50, "Yaşlan", GREEN),
-    Button(250, 400, 150, 50, "Çalış", BLUE),
-    Button(450, 400, 150, 50, "Okula Git", RED),
+    Button(250, 400, 150, 50, "Çalış", BLUE, work_icon),
+    Button(450, 400, 150, 50, "Okula Git", RED, school_icon),
     Button(50, 500, 150, 50, "Arkadaş Edin", YELLOW),
     Button(250, 500, 150, 50, "Aile Ekle", PURPLE),
     Button(450, 500, 150, 50, "Romantik İlişki", RED)
@@ -183,8 +192,11 @@ while running:
                     elif button.text == "Romantik İlişki":
                         player.start_romantic_relationship()
 
-    # Ekranı temizle
-    screen.fill(WHITE)
+    # Arka planı çiz
+    screen.blit(background_image, (0, 0))
+
+    # Karakter resmini çiz
+    screen.blit(character_image, (600, 50))
 
     # Karakter bilgilerini göster
     player.display_info(screen)
