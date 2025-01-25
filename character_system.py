@@ -110,7 +110,12 @@ class CharacterCreator:
                 'Hobiler': self.elements['hobbies_dropdown'].selected_option,
                 'Yetenekler': self.elements['skills_dropdown'].selected_option
             },
-            'stats': self.stat_values
+            'stats': self.stat_values,
+            'additional_traits': {
+                'Hırs': self.elements['ambition_dropdown'].selected_option,
+                'Yaratıcılık': self.elements['creativity_dropdown'].selected_option,
+                'Şans': self.elements['luck_dropdown'].selected_option
+            }
         }
         
         return character_data
@@ -258,6 +263,60 @@ class CharacterCreator:
         self.elements['skills_dropdown'] = pygame_gui.elements.UIDropDownMenu(
             options_list=['İletişim', 'Problem Çözme', 'Organizasyon', 'Yaratıcılık', 'Teknik'],
             starting_option='İletişim',
+            relative_rect=pygame.Rect((right_panel_x, y_pos), (right_panel_width, dropdown_height)),
+            manager=self.manager,
+            container=self.elements['main_panel']
+        )
+        
+        # Ambition
+        y_pos += dropdown_height + vertical_spacing
+        self.elements['ambition_label'] = pygame_gui.elements.UILabel(
+            relative_rect=pygame.Rect((right_panel_x, y_pos), (right_panel_width, label_height)),
+            text='Hırs:',
+            manager=self.manager,
+            container=self.elements['main_panel']
+        )
+        
+        y_pos += label_height
+        self.elements['ambition_dropdown'] = pygame_gui.elements.UIDropDownMenu(
+            options_list=['Düşük', 'Orta', 'Yüksek'],
+            starting_option='Orta',
+            relative_rect=pygame.Rect((right_panel_x, y_pos), (right_panel_width, dropdown_height)),
+            manager=self.manager,
+            container=self.elements['main_panel']
+        )
+        
+        # Creativity
+        y_pos += dropdown_height + vertical_spacing
+        self.elements['creativity_label'] = pygame_gui.elements.UILabel(
+            relative_rect=pygame.Rect((right_panel_x, y_pos), (right_panel_width, label_height)),
+            text='Yaratıcılık:',
+            manager=self.manager,
+            container=self.elements['main_panel']
+        )
+        
+        y_pos += label_height
+        self.elements['creativity_dropdown'] = pygame_gui.elements.UIDropDownMenu(
+            options_list=['Düşük', 'Orta', 'Yüksek'],
+            starting_option='Orta',
+            relative_rect=pygame.Rect((right_panel_x, y_pos), (right_panel_width, dropdown_height)),
+            manager=self.manager,
+            container=self.elements['main_panel']
+        )
+        
+        # Luck
+        y_pos += dropdown_height + vertical_spacing
+        self.elements['luck_label'] = pygame_gui.elements.UILabel(
+            relative_rect=pygame.Rect((right_panel_x, y_pos), (right_panel_width, label_height)),
+            text='Şans:',
+            manager=self.manager,
+            container=self.elements['main_panel']
+        )
+        
+        y_pos += label_height
+        self.elements['luck_dropdown'] = pygame_gui.elements.UIDropDownMenu(
+            options_list=['Düşük', 'Orta', 'Yüksek'],
+            starting_option='Orta',
             relative_rect=pygame.Rect((right_panel_x, y_pos), (right_panel_width, dropdown_height)),
             manager=self.manager,
             container=self.elements['main_panel']

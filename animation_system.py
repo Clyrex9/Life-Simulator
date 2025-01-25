@@ -28,6 +28,21 @@ class Animation:
             frame = self.frames[self.current_frame]
             surface.blit(frame, (x, y))
             
+    def play_event_animation(self, event_type):
+        event_animations = {
+            'level_up': 'level_up_prefix',
+            'money_gain': 'money_gain_prefix',
+            'money_loss': 'money_loss_prefix'
+        }
+        
+        if event_type in event_animations:
+            prefix = event_animations[event_type]
+            self.frames = []
+            for i in range(1, self.frame_count + 1):
+                frame = pygame.image.load(os.path.join('assets', 'animations', f'{prefix}{i}.png')).convert_alpha()
+                self.frames.append(frame)
+            self.reset()
+
     def reset(self):
         self.current_frame = 0
         self.finished = False
