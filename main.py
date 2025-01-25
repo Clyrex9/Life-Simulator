@@ -163,6 +163,22 @@ class LifeSimulator:
             ('quit', 'Çıkış')
         ]
         
+        # Yeni özellikler
+        traits = [
+            ('Hırs', self.character.traits["Hırs"]),
+            ('Yaratıcılık', self.character.traits["Yaratıcılık"]),
+            ('Şans', self.character.traits["Şans"])
+        ]
+        
+        for trait_name, trait_value in traits:
+            self.game_ui[f'{trait_name}_label'] = pygame_gui.elements.UILabel(
+                relative_rect=pygame.Rect((20, y_pos), (info_panel_width - 40, 30)),
+                text=f'{trait_name}: {trait_value}',
+                manager=self.manager,
+                container=self.game_ui['info_panel']
+            )
+            y_pos += 40
+        
         for i, (key, text) in enumerate(buttons):
             self.main_menu_buttons[key] = pygame_gui.elements.UIButton(
                 relative_rect=pygame.Rect(
@@ -258,7 +274,7 @@ class LifeSimulator:
             
         character = self.character_creator.handle_event(event)
         if character:
-            self.character = character
+            self.character = Character(character)
             self.setup_game()  # Karakter oluşturulduğunda oyuna geç
             
     def setup_game_ui(self):
@@ -413,10 +429,14 @@ class LifeSimulator:
             
         if button == self.game_ui.get('yas_ilerle_button'):
             # Yaş ilerleme mantığı
-            pass
+            self.character.age_up()
+            self.play_level_up_animation()
+            self.update_stats_display()
         elif button == self.game_ui.get('okula_git_button'):
             # Okul mantığı
-            pass
+            education_system = EducationSystem(self.width, self.height, self.manager)
+            education_system.update_grades(self.character)
+            self.update_stats_display()
         elif button == self.game_ui.get('ise_git_button'):
             # İş mantığı
             pass
